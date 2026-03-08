@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashScreen">
+
+    <fragment
+        android:id="@+id/loginScreen"
+        android:name="uz.gita.contactapp.presenter.screen.login.LoginScreen"
+        tools:layout="@layout/login_screen"
+        android:label="LoginScreen" >
+        <action
+            android:id="@+id/action_loginScreen_to_registerScreen"
+            app:destination="@id/registerScreen" />
+        <action
+            android:id="@+id/action_loginScreen_to_homeScreen"
+            app:destination="@id/homeScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/splashScreen"
+        android:name="uz.gita.contactapp.presenter.screen.splash.SplashScreen"
+        tools:layout="@layout/splash_screen"
+        android:label="SplashScreen" >
+        <action
+            android:id="@+id/action_splashScreen_to_loginScreen"
+            app:destination="@id/loginScreen" />
+        <action
+            android:id="@+id/action_splashScreen_to_homeScreen"
+            app:destination="@id/homeScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeScreen"
+        android:name="uz.gita.contactapp.presenter.screen.home.HomeScreen"
+        tools:layout="@layout/home_screen"
+        android:label="HomeScreen" >
+        <action
+            android:id="@+id/action_homeScreen_to_loginScreen"
+            app:destination="@id/loginScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerScreen"
+        android:name="uz.gita.contactapp.presenter.screen.register.RegisterScreen"
+        tools:layout="@layout/register_screen"
+        android:label="RegisterScreen" >
+        <action
+            android:id="@+id/action_registerScreen_to_homeScreen"
+            app:destination="@id/homeScreen" />
+    </fragment>
+</navigation>
