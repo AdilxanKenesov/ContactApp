@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 
 object TokenManager {
-    private const val PREFS_NAME = "auth_prefs"
+    private const val PREFS_NAME = "auth_prefs2"
     private const val KEY_TOKEN = "token"
     private const val KEY_NAME = "name"
     private const val KEY_PASSWORD = "password"

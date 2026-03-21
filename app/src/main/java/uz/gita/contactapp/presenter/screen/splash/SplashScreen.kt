@@ -1,6 +1,7 @@
 package uz.gita.contactapp.presenter.screen.splash
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
@@ -23,6 +24,8 @@ class SplashScreen : Fragment(R.layout.splash_screen) {
 
         startAnimation()
         openNextScreen()
+
+        Log.d("TTT", "${TokenManager.getToken()}")
     }
 
     private fun startAnimation() {
