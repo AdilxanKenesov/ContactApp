@@ -3,6 +3,8 @@ package uz.gita.contactapp.presenter.screen.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import uz.gita.contactapp.data.model.auth.request.AuthRequest
 import uz.gita.contactapp.data.model.auth.response.AuthData
 import uz.gita.contactapp.data.model.auth.response.GenericResponse
@@ -16,14 +18,14 @@ class LoginViewModel(private val repo: AuthRepository): ViewModel() {
     val error: LiveData<String> get() = _error
 
     fun login(name: String, password: String){
-        repo.login(
-            AuthRequest(name = name, password = password),
-            onSuccess = {
-                _loginResult.postValue(it)
-            },
-            onError = {
-                _error.postValue(it)
-            }
-        )
+       viewModelScope.launch {
+           val result = repo.login(AuthRequest(name,password))
+
+           result.onSuccess { response ->
+               _loginResult.value = response
+           }.onFailure {
+               _error.value = it.message ?: "Error"
+           }
+       }
     }
 }

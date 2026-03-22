@@ -3,6 +3,8 @@ package uz.gita.contactapp.presenter.screen.home
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import uz.gita.contactapp.data.local.TokenManager
 import uz.gita.contactapp.data.model.auth.request.AuthRequest
 import uz.gita.contactapp.data.model.auth.response.DeleteAccountData
@@ -85,46 +87,34 @@ class HomeViewModel(private val Authrepo: AuthRepository, private val contactRep
         )
     }
     fun logout(){
-        val name = TokenManager.getName()
-        val password = TokenManager.getPassword()
+        viewModelScope.launch {
+            val name = TokenManager.getName() ?: ""
+            val password = TokenManager.getPassword() ?: ""
 
-        if (name == null || password == null){
-            _error.postValue("User data not found")
-            return
-        }
-        val request = AuthRequest(name,password)
-
-        TokenManager.clearAll()
-        Authrepo.logout(
-            request = request,
-            onSuccess = {result ->
-                _logoutResult.postValue(result)
-            },
-            onError = {
-                _error.postValue(it)
+            val request = AuthRequest(name,password)
+            val result = Authrepo.logout(request)
+            result.onSuccess {
+                _logoutResult.value = it
+            }.onFailure {
+                _error.value = it.message ?: "Error"
             }
-        )
+        }
+
     }
     fun deleteAccount(){
-        val name = TokenManager.getName()
-        val password = TokenManager.getPassword()
+        viewModelScope.launch {
+            val name = TokenManager.getName() ?: ""
+            val password = TokenManager.getPassword() ?: ""
+            val request = AuthRequest(name,password)
 
-        if (name == null || password == null){
-            _error.postValue("User data not found")
-            return
+            val result = Authrepo.delete(request)
+            result.onSuccess {
+                _deleteResult.value = it
+            }.onFailure {
+                _error.value = it.message ?: "Error"
+            }
         }
 
-        val request = AuthRequest(name,password)
-
-        Authrepo.delete(
-            request = request,
-            onSuccess = {result->
-                _deleteResult.postValue(result)
-            },
-            onError = {
-                _error.postValue(it)
-            }
-        )
     }
 
 }

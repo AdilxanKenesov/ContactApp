@@ -6,8 +6,8 @@ import uz.gita.contactapp.data.model.auth.response.DeleteAccountData
 import uz.gita.contactapp.data.model.auth.response.GenericResponse
 
 interface AuthRepository {
-    fun register(request: AuthRequest, onSuccess: (GenericResponse<AuthData>) -> Unit, onError: (String) -> Unit)
-    fun login(request: AuthRequest, onSuccess: (GenericResponse<AuthData>) -> Unit, onError: (String) -> Unit)
-    fun logout(request: AuthRequest, onSuccess: (GenericResponse<Unit>) -> Unit, onError: (String) -> Unit)
-    fun delete(request: AuthRequest, onSuccess: (GenericResponse<DeleteAccountData>) -> Unit, onError: (String) -> Unit)
+    suspend fun register(request: AuthRequest): Result<GenericResponse<AuthData>>
+    suspend fun login(request: AuthRequest): Result<GenericResponse<AuthData>>
+    suspend fun logout(request: AuthRequest): Result<GenericResponse<Unit>>
+    suspend fun delete(request: AuthRequest): Result<GenericResponse<DeleteAccountData>>
 }

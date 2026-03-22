@@ -44,6 +44,7 @@ class LoginScreen: Fragment(R.layout.login_screen) {
                 viewModel.login(name,password)
             }
         }
+
         observeViewModel()
     }
 
