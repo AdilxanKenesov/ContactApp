@@ -2,13 +2,19 @@ package uz.gita.contactapp.presenter.screen.login
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.launch
 import uz.gita.contactapp.R
 import uz.gita.contactapp.databinding.LoginScreenBinding
 import uz.gita.contactapp.util.NotificationType
+import uz.gita.contactapp.util.UiState
 import uz.gita.contactapp.util.showNotification
 
 class LoginScreen: Fragment(R.layout.login_screen) {
@@ -49,18 +55,37 @@ class LoginScreen: Fragment(R.layout.login_screen) {
     }
 
     private fun observeViewModel(){
-        viewModel.loginResult.observe(viewLifecycleOwner){response ->
-            if (response.data != null){
-                findNavController().navigate(R.id.action_loginScreen_to_homeScreen)
-            }else{
-                requireActivity().showNotification(response.message, NotificationType.ERROR)
-            }
-        }
-        viewModel.error.observe(viewLifecycleOwner){
-            requireActivity().showNotification(it, NotificationType.ERROR)
-        }
+       viewLifecycleOwner.lifecycleScope.launch {
+           viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+               viewModel.loginResult.collect { state ->
+                   when(state){
+                       is UiState.Loading ->{
+                           showLoading(true)
+                       }
+                       is UiState.Success -> {
+                           showLoading(false)
+                           findNavController().navigate(R.id.action_loginScreen_to_homeScreen)
+                       }
+                       is UiState.Error -> {
+                           showLoading(false)
+                           requireActivity().showNotification(state.message, NotificationType.ERROR)
+                       }
+                       null ->{
+                           showLoading(false)
+                       }
+                   }
+               }
+           }
+       }
     }
 
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.isVisible = isLoading
+
+        binding.btnLogin.isEnabled = !isLoading
+        binding.etLogin.isEnabled = !isLoading
+        binding.etPassword.isEnabled = !isLoading
+    }
     private fun clearErrors(){
         binding.containerLogin.error = null
         binding.containerPassword.error = null

@@ -1,6 +1,6 @@
 package uz.gita.contactapp.data.model.network.api
 
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -14,16 +14,15 @@ import uz.gita.contactapp.data.model.contact.request.UpdateContactRequest
 import uz.gita.contactapp.data.model.contact.response.ContactResponse
 
 interface ContactApi {
-
     @GET("contact")
-    fun getContact(@Header("token") token: String): Call<GenericResponse<List<ContactResponse>>>
+    suspend fun getContact(@Header("token") token: String): Response<GenericResponse<List<ContactResponse>>>
 
     @POST("contact")
-    fun addContact(@Header("token") token: String, @Body request: ContactRequest): Call<GenericResponse<ContactResponse>>
+    suspend fun addContact(@Header("token") token: String, @Body request: ContactRequest): Response<GenericResponse<ContactResponse>>
 
     @PUT("contact")
-    fun updateContact(@Header("token") token: String, @Body request: UpdateContactRequest): Call<GenericResponse<ContactResponse>>
+    suspend fun updateContact(@Header("token") token: String, @Body request: UpdateContactRequest): Response<GenericResponse<ContactResponse>>
 
     @DELETE("contact/delete")
-    fun deleteContact(@Header("token") token: String, @Query("id") id: Int): Call<GenericResponse<Unit>>
+    suspend fun deleteContact(@Header("token") token: String, @Query("id") id: Int): Response<GenericResponse<Unit>>
 }

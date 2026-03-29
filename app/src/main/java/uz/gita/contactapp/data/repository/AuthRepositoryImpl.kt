@@ -1,7 +1,9 @@
 package uz.gita.contactapp.data.repository
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import uz.gita.contactapp.data.model.auth.request.AuthRequest
 import uz.gita.contactapp.data.model.auth.response.AuthData
 import uz.gita.contactapp.data.model.auth.response.DeleteAccountData
@@ -21,8 +23,7 @@ class AuthRepositoryImpl(private val authApi: AuthApi): AuthRepository {
         }
     }
 
-    override suspend fun register(request: AuthRequest): Result<GenericResponse<AuthData>> {
-        return withContext(Dispatchers.IO){
+    override suspend fun register(request: AuthRequest): Flow<Result<GenericResponse<AuthData>>> = flow{
             try {
                 val response = authApi.register(request)
 
@@ -33,22 +34,21 @@ class AuthRepositoryImpl(private val authApi: AuthApi): AuthRepository {
                             TokenManager.saveToken(token)
                         }
                         TokenManager.saveUserData(request.name, request.password)
-                        Result.success(result)
+                        emit(Result.success(result))
                     } else {
-                        Result.failure(Exception("Server Error"))
+                        emit(Result.failure(Exception("Server Error")))
                     }
                 }else{
-                    Result.failure(Exception("Error: ${response.code()}"))
+                    emit(Result.failure(Exception("Error: ${response.code()}")))
                 }
             }catch (e: Exception){
-                Result.failure(e)
+                emit(Result.failure(e))
             }
-        }
+
     }
 
-    override suspend fun login(request: AuthRequest): Result<GenericResponse<AuthData>> {
-        return withContext(Dispatchers.IO){
-            try {
+    override suspend fun login(request: AuthRequest): Flow<Result<GenericResponse<AuthData>>> = flow {
+        try {
                 val response = authApi.login(request)
                 if (response.isSuccessful){
                     val result = response.body()
@@ -57,51 +57,46 @@ class AuthRepositoryImpl(private val authApi: AuthApi): AuthRepository {
                             TokenManager.saveToken(token)
                         }
                         TokenManager.saveUserData(request.name, request.password)
-                        Result.success(result)
+                        emit(Result.success(result))
                     }else{
-                        Result.failure(Exception("Server Error"))
+                        emit(Result.failure(Exception("Server Error")))
                     }
                 }else{
-                    Result.failure(Exception("Error: ${response.code()}"))
+                    emit(Result.failure(Exception("Error: ${response.code()}")))
                 }
             }catch (e: Exception){
-                Result.failure(e)
+                emit(Result.failure(e))
             }
-        }
-    }
+    }.flowOn(Dispatchers.IO)
 
-    override suspend fun logout(request: AuthRequest): Result<GenericResponse<Unit>> {
-        return withContext(Dispatchers.IO) {
+    override suspend fun logout(request: AuthRequest): Flow<Result<GenericResponse<Unit>>> = flow {
             try {
                 val response = authApi.logout(request)
                 if (response.isSuccessful) {
                     val result = response.body()
                     if (result != null) {
                         TokenManager.clearAll()
-                        Result.success(result)
-                    } else Result.failure(Exception("Body is null"))
-                } else Result.failure(Exception("Error: ${response.code()}"))
-            } catch (e: Exception) { Result.failure(e) }
-        }
-    }
+                        emit(Result.success(result))
+                    } else emit(Result.failure(Exception("Body is null")))
+                } else emit(Result.failure(Exception("Error: ${response.code()}")))
+            } catch (e: Exception) { emit(Result.failure(e)) }
+    }.flowOn(Dispatchers.IO)
 
-    override suspend fun delete(request: AuthRequest): Result<GenericResponse<DeleteAccountData>> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = authApi.deleteAccount(request)
-
+    override suspend fun delete(request: AuthRequest): Flow<Result<GenericResponse<DeleteAccountData>>> = flow {
+        try {
+            val response = authApi.deleteAccount(request)
                 if (response.isSuccessful) {
                     val result = response.body()
                     if (result != null) {
                         TokenManager.clearAll()
-                        Result.success(result)
-                    } else Result.failure(Exception("Body is null"))
+                        emit(Result.success(result))
+                    } else emit(Result.failure(Exception("Body is null")))
                 } else {
-                    Result.failure(Exception("Error: ${response.code()}"))
+                    emit(Result.failure(Exception("Error: ${response.code()}")))
                 }
             } catch (e: Exception) {
-                Result.failure(e)
+                emit(Result.failure(e))
             }
-        }
-    }
+        }.flowOn(Dispatchers.IO)
+
 }

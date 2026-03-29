@@ -10,6 +10,6 @@ import uz.gita.contactapp.data.repository.ContactRepositoryImpl
 @Suppress("UNCHECKED_CAST")
 class HomeViewModelFactory: ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return HomeViewModel(AuthRepositoryImpl.getInstance(), ContactRepositoryImpl(Gson(), OkHttpClient())) as T
+        return HomeViewModel(AuthRepositoryImpl.getInstance(), ContactRepositoryImpl.getInstance()) as T
     }
 }

@@ -2,13 +2,19 @@ package uz.gita.contactapp.presenter.screen.register
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.launch
 import uz.gita.contactapp.R
 import uz.gita.contactapp.databinding.RegisterScreenBinding
 import uz.gita.contactapp.util.NotificationType
+import uz.gita.contactapp.util.UiState
 import uz.gita.contactapp.util.showNotification
 
 class RegisterScreen: Fragment(R.layout.register_screen) {
@@ -58,16 +64,36 @@ class RegisterScreen: Fragment(R.layout.register_screen) {
     }
 
     private fun observeViewModel(){
-        viewModel.registerResult.observe(viewLifecycleOwner){response ->
-            if (response.data != null){
-                findNavController().navigate(R.id.action_registerScreen_to_homeScreen)
-            }else{
-                requireActivity().showNotification(response.message, NotificationType.ERROR)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.registerResult.collect { state ->
+                    when(state){
+                        is UiState.Loading ->{
+                            showLoading(true)
+                        }
+                        is UiState.Success -> {
+                            showLoading(false)
+                            findNavController().navigate(R.id.action_registerScreen_to_homeScreen)
+                        }
+                        is UiState.Error -> {
+                            showLoading(false)
+                            requireActivity().showNotification(state.message, NotificationType.ERROR)
+                        }
+                        null -> {
+                            showLoading(false)
+                        }
+                    }
+                }
             }
         }
-        viewModel.error.observe(viewLifecycleOwner){
-            requireActivity().showNotification(it, NotificationType.ERROR)
-        }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.isVisible = isLoading
+
+        binding.btnRegister.isEnabled = !isLoading
+        binding.etLogin.isEnabled = !isLoading
+        binding.etPassword.isEnabled = !isLoading
     }
 
     private fun clearErrors(){
